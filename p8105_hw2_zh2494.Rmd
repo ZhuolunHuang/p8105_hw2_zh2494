@@ -1,0 +1,28 @@
+---
+title: "p8105_hw2_zh2494"
+author: "zhuolun"
+date: "10/5/2021"
+output: github_document
+---
+
+```{r,echo = FALSE, message = FALSE}
+library(tidyverse)
+library(readxl)
+library(haven)
+library(tidyr)
+```
+
+```{r}
+trash_df = 
+  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:N408") %>%
+  janitor::clean_names() %>% 
+  na.omit(trash_df$Dumpster)
+trash_df$sports_balls = round(trash_df$sports_balls, digits = 0)
+view(trash_df)
+```
+
+```{r}
+trash_df = drop_na(trash_df, dumpster)
+round(trash_df$sports_balls, digits = 0)
+```
+
