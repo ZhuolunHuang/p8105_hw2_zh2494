@@ -12,17 +12,97 @@ library(haven)
 library(tidyr)
 ```
 
+# question 1
 ```{r}
 trash_df = 
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:N408") %>%
   janitor::clean_names() %>% 
-  na.omit(trash_df$Dumpster)
-trash_df$sports_balls = round(trash_df$sports_balls, digits = 0)
+  na.omit(dumpster) %>%
+  mutate(sports_balls = round(as.numeric(sports_balls),digits = 0))
 view(trash_df)
+
+trash_df_19 =
+  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",4) %>%
+  janitor::clean_names(dat = .) %>%
+  na.omit(month) %>%
+  mutate(Year = "2019")
+view(trash_df_19)
+
+trash_df_18 =
+  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",5) %>% 
+  janitor::clean_names(dat = .) %>%
+  na.omit(dumpster) %>%
+  mutate(Year = "2018")
+view(trash_df_18)
+
+trash_df_18_19 = 
+  bind_rows(trash_df_18,trash_df_19) %>% 
+  janitor::clean_names() %>%
+  mutate(month = month.name[month]) %>% 
+  select("year","month",everything())
+view(trash_df_18_19)
+
+median_choose = select(trash_df,dumpster,year)
+median_choose = subset(median_choose, year == 2019)
+median(pull(median_choose,dumpster))
+```
+
+the total precipitation in 2018 is `r sum(trash_df_18$total)`,the median number of sports balls in a dumpster in 2019 is `r median(pull(median_choose,dumpster))`
+
+# question 2
+```{r}
+pols_month = 
+  read_csv("./fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(mon = as.Date(mon, format = "%m/%d/%y")) %>% 
+  separate(mon, c("year","month","day")) %>% 
+  mutate(
+    month = month.name[as.numeric(month)],
+    president = ifelse(prez_gop == 1, "gop", ifelse(prez_dem == 1, "dem",0))) %>% 
+  select(-prez_gop,-prez_dem,-day)
+view(pols_month)
+
+
+snp = 
+  read_csv("./fivethirtyeight_datasets/snp.csv") %>%
+  janitor::clean_names() %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y")) %>% 
+  separate(date, c("year","month","day")) %>% 
+  mutate(
+    month = month.name[as.numeric(month)],
+    day = NULL) %>% 
+  select("year","month",everything())
+view(snp)
+
+unemployment = 
+  read_csv("./fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "value") %>% 
+  mutate(
+    year = as.character(year),
+    month = str_to_title(month),
+    month = month.name[match(month,month.abb)]
+    )
+view(unemployment)
+
+pols_month_snp =
+  left_join(pols_month,snp,by = c("year","month"))
+
+final_df = 
+  left_join(pols_month_snp,unemployment,by = c("year","month"))
 ```
 
 ```{r}
-trash_df = drop_na(trash_df, dumpster)
-round(trash_df$sports_balls, digits = 0)
+as.Date(year, format = "%m/%d/%y") %>% 
+  separate(date, c("year","month","day")) %>% 
+  mutate(
+    month = month.name[as.numeric(month)],
+    day = NULL) %>% 
+  select("year","month",everything())
+view(snp)
+
 ```
 
