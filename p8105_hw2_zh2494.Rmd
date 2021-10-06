@@ -10,6 +10,8 @@ library(tidyverse)
 library(readxl)
 library(haven)
 library(tidyr)
+library(dplyr)
+
 ```
 
 # question 1
@@ -62,16 +64,18 @@ pols_month =
   select(-prez_gop,-prez_dem,-day)
 view(pols_month)
 
-
 snp = 
   read_csv("./fivethirtyeight_datasets/snp.csv") %>%
   janitor::clean_names() %>% 
-  mutate(date = as.Date(date, format = "%m/%d/%y")) %>% 
+  mutate(
+    date = as.Date(date, format = "%m/%d/%y")) %>% 
   separate(date, c("year","month","day")) %>% 
   mutate(
     month = month.name[as.numeric(month)],
     day = NULL) %>% 
   select("year","month",everything())
+snp$year = as.numeric(snp$year)
+snp$year = ifelse(snp$year >= 2050, snp$year - 100, snp$year)
 view(snp)
 
 unemployment = 
@@ -93,16 +97,36 @@ pols_month_snp =
 
 final_df = 
   left_join(pols_month_snp,unemployment,by = c("year","month"))
+
+skimr::skim(final_df)
+summary(final_df)
 ```
 
+# question 3
 ```{r}
-as.Date(year, format = "%m/%d/%y") %>% 
-  separate(date, c("year","month","day")) %>% 
+Baby = read_csv("data/Popular_Baby_Names.csv")
+Baby = distinct(Baby)
+
+Olivia =
+  Baby %>% 
   mutate(
-    month = month.name[as.numeric(month)],
-    day = NULL) %>% 
-  select("year","month",everything())
-view(snp)
+    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
+  ) %>% 
+  filter(childs_first_name == "Olivia") %>% 
+  select(-gender,-count,-childs_first_name) %>% 
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "rank")
+view(Olivia)
+
+most_name = 
+  Baby %>% 
+  mutate(
+    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
+  ) %>% 
+  filter(Gender == "male")
+view(most_name)
+  
 
 ```
 
