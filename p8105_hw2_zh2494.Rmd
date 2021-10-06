@@ -44,12 +44,9 @@ trash_df_18_19 =
   select("year","month",everything())
 view(trash_df_18_19)
 
-median_choose = select(trash_df,dumpster,year)
-median_choose = subset(median_choose, year == 2019)
-median(pull(median_choose,dumpster))
 ```
 
-the total precipitation in 2018 is `r sum(trash_df_18$total)`,the median number of sports balls in a dumpster in 2019 is `r median(pull(median_choose,dumpster))`
+the total precipitation in 2018 is `r sum(trash_df_18$total)`,the median number of sports balls in a dumpster in 2019 is `r median(pull(filter(trash_df,year == 2019),sports_balls))`
 
 # question 2
 ```{r}
@@ -60,8 +57,9 @@ pols_month =
   separate(mon, c("year","month","day")) %>% 
   mutate(
     month = month.name[as.numeric(month)],
-    president = ifelse(prez_gop == 1, "gop", ifelse(prez_dem == 1, "dem",0))) %>% 
-  select(-prez_gop,-prez_dem,-day)
+    president = ifelse(prez_gop == 1, "gop", ifelse(prez_dem == 1, "dem",0)),
+    year = as.numeric(year)) %>% 
+  select(-"prez_gop",-"prez_dem",-"day")
 view(pols_month)
 
 snp = 
@@ -86,7 +84,6 @@ unemployment =
     names_to = "month",
     values_to = "value") %>% 
   mutate(
-    year = as.character(year),
     month = str_to_title(month),
     month = month.name[match(month,month.abb)]
     )
@@ -109,6 +106,7 @@ Baby = distinct(Baby)
 
 Olivia =
   Baby %>% 
+  janitor::clean_names() %>% 
   mutate(
     ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
   ) %>% 
@@ -121,12 +119,27 @@ view(Olivia)
 
 most_name = 
   Baby %>% 
+  janitor::clean_names() %>% 
   mutate(
     ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
   ) %>% 
-  filter(Gender == "male")
+  filter(gender == "MALE",rank == "1") %>% 
+  select(-gender,-count,-rank) %>% 
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "childs_first_name"
+  )
 view(most_name)
-  
 
+finall_plot =
+  Baby %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
+  ) %>%
+  filter(gender == "MALE",year_of_birth == "2016",ethnicity == "white non hispanic")
+view(finall_plot)
+
+ggplot(finall_plot, aes(x = rank, y = count )) + geom_point(alpha = 0.5)
 ```
 
