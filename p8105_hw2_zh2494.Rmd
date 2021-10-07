@@ -15,6 +15,8 @@ library(dplyr)
 
 # question 1
 ```{r}
+
+# the trash_df is the data from Trash-Wheel-Collection-Totals-8-6-19
 trash_df = 
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:N408") %>%
   janitor::clean_names() %>% 
@@ -22,6 +24,7 @@ trash_df =
   mutate(sports_balls = round(as.numeric(sports_balls),digits = 0))
 view(trash_df)
 
+# the trash_df_19 is the data from 2019 year in xlsx file
 trash_df_19 =
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",4) %>%
   janitor::clean_names() %>%
@@ -29,12 +32,14 @@ trash_df_19 =
   mutate(Year = "2019")
 view(trash_df_19)
 
+# the trash_df_18 is the data from 2018 year in xlsx file
 trash_df_18 =
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",5) %>% 
   janitor::clean_names() %>%
   mutate(Year = "2018")
 view(trash_df_18)
 
+# the trash_df_18_19 is combine the data from 2018 and 2019 
 trash_df_18_19 = 
   bind_rows(trash_df_18,trash_df_19) %>% 
   janitor::clean_names() %>%
@@ -42,11 +47,20 @@ trash_df_18_19 =
   select("year","month",everything())
 view(trash_df_18_19)
 
-skimr::skim(trash_df)
-names(trash_df)
 ```
 
+the key variable for the file "Trash-Wheel-Collection-Totals" is `r names(trash_df)`
+
 the total precipitation in 2018 is `r sum(pull(trash_df_18,total))`,the median number of sports balls in a dumpster in 2019 is `r median(pull(filter(trash_df,year == 2019),sports_balls))`
+
+the total precipitation in 2019 is `r sum(pull(trash_df_19,total))`,the median number of sports balls in a dumpster in 2018 is `r median(pull(filter(trash_df,year == 2018),sports_balls))`
+
+the total precipitation in 2018 and 2019 is `r sum(pull(trash_df_18_19,total))`,the median number of sports balls in a dumpster in 2018 and 2019 is `r median(pull(trash_df,sports_balls))`
+
+the number of observations in both resulting dataset.
+the 2018 is `r skimr::skim(trash_df_18)`
+the 2019 is `r skimr::skim(trash_df_19)`
+the 2019 and 2019 is `r skimr::skim(trash_df_18_19)`
 
 # question 2
 ```{r}
