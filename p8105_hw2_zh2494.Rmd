@@ -11,7 +11,6 @@ library(readxl)
 library(haven)
 library(tidyr)
 library(dplyr)
-
 ```
 
 # question 1
@@ -19,21 +18,20 @@ library(dplyr)
 trash_df = 
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:N408") %>%
   janitor::clean_names() %>% 
-  na.omit(dumpster) %>%
+  drop_na(dumpster) %>%
   mutate(sports_balls = round(as.numeric(sports_balls),digits = 0))
 view(trash_df)
 
 trash_df_19 =
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",4) %>%
-  janitor::clean_names(dat = .) %>%
-  na.omit(month) %>%
+  janitor::clean_names() %>%
+  drop_na(total) %>%
   mutate(Year = "2019")
 view(trash_df_19)
 
 trash_df_18 =
   read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",5) %>% 
-  janitor::clean_names(dat = .) %>%
-  na.omit(dumpster) %>%
+  janitor::clean_names() %>%
   mutate(Year = "2018")
 view(trash_df_18)
 
@@ -44,9 +42,11 @@ trash_df_18_19 =
   select("year","month",everything())
 view(trash_df_18_19)
 
+skimr::skim(trash_df)
+names(trash_df)
 ```
 
-the total precipitation in 2018 is `r sum(trash_df_18$total)`,the median number of sports balls in a dumpster in 2019 is `r median(pull(filter(trash_df,year == 2019),sports_balls))`
+the total precipitation in 2018 is `r sum(pull(trash_df_18,total))`,the median number of sports balls in a dumpster in 2019 is `r median(pull(filter(trash_df,year == 2019),sports_balls))`
 
 # question 2
 ```{r}
@@ -101,15 +101,24 @@ summary(final_df)
 
 # question 3
 ```{r}
-Baby = read_csv("data/Popular_Baby_Names.csv")
-Baby = distinct(Baby)
+Baby = 
+  read_csv("data/Popular_Baby_Names.csv") %>% 
+  janitor::clean_names() %>%
+  mutate(
+    gender = str_to_lower(gender),
+    childs_first_name = str_to_title(childs_first_name),
+    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",
+                       `ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",
+                       `HISPANIC` = "hispanic",
+                       `WHITE NON HISP` = "white non hispanic",
+                       `WHITE NON HISPANIC` = "white non hispanic",
+                       `BLACK NON HISPANIC` = "black non hispanic",
+                       `BLACK NON HISP` = "black non hispanic")) %>%
+  distinct()
+
 
 Olivia =
   Baby %>% 
-  janitor::clean_names() %>% 
-  mutate(
-    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
-  ) %>% 
   filter(childs_first_name == "Olivia") %>% 
   select(-gender,-count,-childs_first_name) %>% 
   pivot_wider(
@@ -119,27 +128,20 @@ view(Olivia)
 
 most_name = 
   Baby %>% 
-  janitor::clean_names() %>% 
-  mutate(
-    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
-  ) %>% 
-  filter(gender == "MALE",rank == "1") %>% 
+  filter(gender == "male",rank == "1") %>% 
   select(-gender,-count,-rank) %>% 
   pivot_wider(
     names_from = "year_of_birth",
     values_from = "childs_first_name"
   )
-view(most_name)
+
+head(most_name) %>% knitr::kable()
 
 finall_plot =
-  Baby %>% 
-  janitor::clean_names() %>% 
-  mutate(
-    ethnicity = recode(ethnicity, `ASIAN AND PACI` = "asian and pacific islander",`ASIAN AND PACIFIC ISLANDER` = "asian and pacific islander",`HISPANIC` = "hispanic",`WHITE NON HISP` = "white non hispanic",`WHITE NON HISPANIC` = "white non hispanic",`BLACK NON HISPANIC` = "black non hispanic",`BLACK NON HISP` = "black non hispanic")
-  ) %>%
-  filter(gender == "MALE",year_of_birth == "2016",ethnicity == "white non hispanic")
+  Baby %>%
+  filter(gender == "male",year_of_birth == "2016",ethnicity == "white non hispanic")
 view(finall_plot)
 
-ggplot(finall_plot, aes(x = rank, y = count )) + geom_point(alpha = 0.5)
+ggplot(finall_plot, aes(x = rank, y = count)) + geom_point(alpha = 0.5) + labs(x = "the rank in popularity of that name", y = "the number of children with a name", title = "male, white non-hispanic children born in 2016")
 ```
 
