@@ -18,7 +18,7 @@ library(dplyr)
 
 # the trash_df is the data from Trash-Wheel-Collection-Totals-8-6-19
 trash_df = 
-  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:N408") %>%
+  read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",range = "A2:N535") %>%
   janitor::clean_names() %>% 
   drop_na(dumpster) %>%
   mutate(sports_balls = round(as.numeric(sports_balls),digits = 0))
@@ -26,7 +26,7 @@ view(trash_df)
 
 # the trash_df_19 is the data from 2019 year in xlsx file
 trash_df_19 =
-  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",4) %>%
+  read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",range = "A2:B14",6) %>%
   janitor::clean_names() %>%
   drop_na(total) %>%
   mutate(Year = "2019")
@@ -34,7 +34,7 @@ view(trash_df_19)
 
 # the trash_df_18 is the data from 2018 year in xlsx file
 trash_df_18 =
-  read_excel("data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",range = "A2:B14",5) %>% 
+  read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",range = "A2:B14",7) %>% 
   janitor::clean_names() %>%
   mutate(Year = "2018")
 view(trash_df_18)
