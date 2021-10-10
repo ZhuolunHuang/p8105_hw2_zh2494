@@ -22,7 +22,7 @@ trash_df =
   janitor::clean_names() %>% 
   drop_na(dumpster) %>%
   mutate(sports_balls = round(as.numeric(sports_balls),digits = 0))
-view(trash_df)
+head(trash_df, 5) %>% knitr::kable()
 
 # the trash_df_19 is the data from 2019 year in xlsx file
 trash_df_19 =
@@ -30,14 +30,14 @@ trash_df_19 =
   janitor::clean_names() %>%
   drop_na(total) %>%
   mutate(Year = "2019")
-view(trash_df_19)
+head(trash_df_19, 5) %>% knitr::kable()
 
 # the trash_df_18 is the data from 2018 year in xlsx file
 trash_df_18 =
   read_excel("data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",range = "A2:B14",7) %>% 
   janitor::clean_names() %>%
   mutate(Year = "2018")
-view(trash_df_18)
+head(trash_df_18, 5) %>% knitr::kable()
 
 # the trash_df_18_19 is combine the data from 2018 and 2019 
 trash_df_18_19 = 
@@ -45,7 +45,7 @@ trash_df_18_19 =
   janitor::clean_names() %>%
   mutate(month = month.name[month]) %>% 
   select("year","month",everything())
-view(trash_df_18_19)
+head(trash_df_18_19, 5) %>% knitr::kable()
 
 ```
 
@@ -74,7 +74,7 @@ pols_month =
     president = ifelse(prez_gop == 1, "gop", ifelse(prez_dem == 1, "dem",0)),
     year = as.numeric(year)) %>% 
   select(-"prez_gop",-"prez_dem",-"day")
-view(pols_month)
+head(pols_month,5) %>% knitr::kable()
 
 snp = 
   read_csv("./fivethirtyeight_datasets/snp.csv") %>%
@@ -88,7 +88,7 @@ snp =
   select("year","month",everything())
 snp$year = as.numeric(snp$year)
 snp$year = ifelse(snp$year >= 2050, snp$year - 100, snp$year)
-view(snp)
+head(snp,5) %>% knitr::kable()
 
 unemployment = 
   read_csv("./fivethirtyeight_datasets/unemployment.csv") %>% 
@@ -101,17 +101,26 @@ unemployment =
     month = str_to_title(month),
     month = month.name[match(month,month.abb)]
     )
-view(unemployment)
+head(unemployment,5) %>% knitr::kable()
 
 pols_month_snp =
   left_join(pols_month,snp,by = c("year","month"))
 
 final_df = 
   left_join(pols_month_snp,unemployment,by = c("year","month"))
+head(final_df, 5) %>% knitr::kable()
 
 skimr::skim(final_df)
 summary(final_df)
 ```
+
+the key variable for the file "fivethirtyeight_datasets/pols-month" is `r names(final_df)`.
+
+the observations in these dataset.
+the pols_moonth is `r skimr::skim(pols_month)`
+the snp is `r skimr::skim(snp)`
+the unemployment is `r skimr::skim(unemployment)`
+the final_df is `r skimr::skim(final_df)`
 
 # question 3
 ```{r}
@@ -129,7 +138,7 @@ Baby =
                        `BLACK NON HISPANIC` = "black non hispanic",
                        `BLACK NON HISP` = "black non hispanic")) %>%
   distinct()
-
+head(Baby, 5) %>% knitr::kable()
 
 Olivia =
   Baby %>% 
@@ -138,7 +147,7 @@ Olivia =
   pivot_wider(
     names_from = "year_of_birth",
     values_from = "rank")
-view(Olivia)
+head(Olivia, 5) %>% knitr::kable()
 
 most_name = 
   Baby %>% 
@@ -154,7 +163,7 @@ head(most_name) %>% knitr::kable()
 finall_plot =
   Baby %>%
   filter(gender == "male",year_of_birth == "2016",ethnicity == "white non hispanic")
-view(finall_plot)
+head(finall_plot,5) %>% knitr::kable()
 
 ggplot(finall_plot, aes(x = rank, y = count)) + geom_point(alpha = 0.5) + labs(x = "the rank in popularity of that name", y = "the number of children with a name", title = "male, white non-hispanic children born in 2016")
 ```
